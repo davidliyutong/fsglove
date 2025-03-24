@@ -1,0 +1,23 @@
+py_cli_interaction
+loguru
+dearpygui
+python-statemachine[diagrams]
+pyrfuniverse==0.20.3
+grpcio-tools==1.60.0
+grpcio==1.60.0
+numpy==1.22.4
+manotorch@git+https://github.com/lixiny/manotorch.git@master
+--find-links https://download.pytorch.org/whl/torch_stable.html
+torch==2.3.0+cu118
+torchvision
+torchaudio
+deprecation
+pydantic==2.9.2
+jsonlines
+chumpy
+multiprocess
+tqdm
+polyscope
+scipy
+scikit-learn==1.5.2
+keyboard==0.13.5

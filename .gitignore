@@ -1,0 +1,18 @@
+# IDE
+.vs
+.vscode
+.idea
+
+# Python
+*.pyc
+*.whl
+*.egg-info
+
+# Configs
+config.json
+*.ini
+
+# Data
+*.json
+*.jsonl
+
