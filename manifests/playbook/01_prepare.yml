@@ -1,0 +1,35 @@
+---
+- name: Prepare an Raspberry Pi
+  hosts: all
+  become: yes
+  gather_facts: yes
+  tasks:
+      - name: Install common packages
+        apt:
+            name:
+                - vim
+                - git
+                - curl
+                - wget
+                - unzip
+                - jq
+                - zsh
+                - htop
+                - iotop
+                - iftop
+                - net-tools
+                - dnsutils
+                - ncat
+            state: present
+            update_cache: yes
+
+- name: Add login user to diaout group
+  hosts: all
+  become: yes
+  gather_facts: yes
+  tasks:
+      - name: Add login user to diaout group
+        user:
+            name: "{{ ansible_user }}"
+            groups: dialout
+            append: yes

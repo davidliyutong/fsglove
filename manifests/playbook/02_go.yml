@@ -1,0 +1,98 @@
+---
+- name: Install Golang 1.21.5
+  hosts: all
+  become: yes
+  gather_facts: yes
+  vars:
+      golang_version: "1.21.5"
+  vars_prompt:
+      - name: "use_ustc_mirror"
+        prompt: "Use USTC mirror to install Golang ? (yes, no)"
+        default: "no"
+        private: no
+
+  tasks:
+      - name: Probe Go version
+        shell: /usr/local/go/bin/go version
+        register: go_version_probe
+        ignore_errors: yes
+
+      - name: Set Golang install flag
+        set_fact:
+            golang_installed: "{{ go_version_probe.rc == 0 and go_version_probe.stdout.find(golang_version) != -1 }}"
+
+      - name: Start installation
+        block:
+            - name: Set download URL base
+              set_fact:
+                  download_url_base: "https://golang.org/dl/"
+              when: use_ustc_mirror | lower != 'yes'
+
+            - name: Set download URL base from USTC
+              set_fact:
+                  download_url_base: "https://mirrors.ustc.edu.cn/golang/"
+              when: use_ustc_mirror | lower == 'yes'
+
+            - name: Set OS and architecture specific variables
+              set_fact:
+                  golang_os: "{{ 'linux' if ansible_system == 'Linux' else 'darwin' if ansible_system == 'Darwin' else 'windows' }}"
+                  golang_arch: >-
+                      {% if ansible_architecture in ['x86_64', 'amd64'] %}
+                        amd64
+                      {% elif ansible_architecture == 'aarch64' %}
+                        arm64
+                      {% elif ansible_architecture == 'armv7l' %}
+                        armv6l
+                      {% else %}
+                        unsupported
+                      {% endif %}
+
+            - name: Fail if architecture is unsupported
+              fail:
+                  msg: "Unsupported CPU architecture: {{ ansible_architecture }}"
+              when: golang_arch == 'unsupported'
+
+            - name: Strip whitespace from golang_arch
+              set_fact:
+                  golang_arch: "{{ golang_arch | trim }}"
+
+            - name: Download Golang
+              get_url:
+                  url: "{{ download_url_base }}/go{{ golang_version }}.{{ golang_os }}-{{ golang_arch }}.tar.gz"
+                  dest: "/tmp/go{{ golang_version }}.{{ golang_os }}-{{ golang_arch }}.tar.gz"
+
+            - name: Remove any previous Go installation
+              command: rm -rf /usr/local/go
+              args:
+                  warn: false
+
+            - name: Extract Golang archive
+              unarchive:
+                  src: "/tmp/go{{ golang_version }}.{{ golang_os }}-{{ golang_arch }}.tar.gz"
+                  dest: /usr/local
+                  remote_src: yes
+
+            - name: Add Golang to PATH and set GOROOT and GOPATH
+              lineinfile:
+                  path: /etc/profile
+                  state: present
+                  regexp: "^export {{ item.key }}="
+                  line: "export {{ item.key }}={{ item.value }}"
+              with_items:
+                  - { key: "PATH", value: "$PATH:/usr/local/go/bin" }
+                  - { key: "GOROOT", value: "/usr/local/go" }
+                  - { key: "GOPATH", value: "$HOME/go" }
+
+            - name: Source the profile to apply changes
+              shell: source /etc/profile
+              args:
+                  executable: /bin/bash
+
+            - name: Verify Golang installation
+              command: /usr/local/go/bin/go version
+              register: go_version
+
+            - name: Print Golang version
+              debug:
+                  msg: "Golang version installed: {{ go_version.stdout }}"
+        when: not golang_installed

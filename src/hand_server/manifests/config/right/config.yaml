@@ -1,0 +1,57 @@
+# NOTICE: this config is for right hand, need to change for left hand
+grpc:
+  port: 18890
+  interface: 0.0.0.0
+api:
+  port: 18889
+  interface: 0.0.0.0
+imu:
+  - name: /dev/ttyCH9344USB0
+    baud: 115200
+    id: imu_12
+  - name: /dev/ttyCH9344USB1
+    baud: 115200
+    id: imu_7
+  - name: /dev/ttyCH9344USB2
+    baud: 115200
+    id: imu_0
+  - name: /dev/ttyCH9344USB3
+    baud: 115200
+    id: imu_9
+  - name: /dev/ttyCH9344USB4
+    baud: 115200
+    id: imu_10
+  - name: /dev/ttyCH9344USB5
+    baud: 115200
+    id: imu_6
+  - name: /dev/ttyCH9344USB6
+    baud: 115200
+    id: imu_8
+  - name: /dev/ttyCH9344USB7
+    baud: 115200
+    id: imu_11
+  - name: /dev/ttyCH9344USB8
+    baud: 115200
+    id: imu_4
+  - name: /dev/ttyCH9344USB9
+    baud: 115200
+    id: imu_13
+  - name: /dev/ttyCH9344USB10
+    baud: 115200
+    id: imu_5
+  - name: /dev/ttyCH9344USB11
+    baud: 115200
+    id: imu_15
+  - name: /dev/ttyCH9344USB12
+    baud: 115200
+    id: imu_2
+  - name: /dev/ttyCH9344USB13
+    baud: 115200
+    id: imu_1
+  - name: /dev/ttyCH9344USB14
+    baud: 115200
+    id: imu_14
+  - name: /dev/ttyCH9344USB15
+    baud: 115200
+    id: imu_3
+debug: false

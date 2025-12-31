@@ -1,0 +1,8 @@
+# Make system
+_output
+
+# golang
+vendor
+
+# config
+manifests/docker-compose/config

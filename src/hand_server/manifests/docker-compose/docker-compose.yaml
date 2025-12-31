@@ -1,0 +1,10 @@
+version: '3.7'
+services:
+  rfmocap-app:
+    restart: always
+    image: docker.io/davidliyutong/rfmocap-app:latest
+    ports:
+      - "18890:18890"
+    volumes:
+      - ./config:/config
+      - /dev/:/dev

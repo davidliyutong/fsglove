@@ -1,18 +1,16 @@
-# IDE
-.vs
-.vscode
-.idea
+# ide
+*.idea
+*.vscode
 
-# Python
+# python
 *.pyc
 *.whl
 *.egg-info
 
-# Configs
-config.json
-*.ini
-
-# Data
+# data
+*.png
 *.json
 *.jsonl
 
+# ini
+*.ini

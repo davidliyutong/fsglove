@@ -1,0 +1,79 @@
+---
+- name: Upload API Server from local to Raspberry Pi
+  hosts: all
+  become: no
+  gather_facts: yes
+  vars_prompt:
+      - name: "use_go_proxy"
+        prompt: "Use goproxy.cn during build ? (yes, no)"
+        default: "no"
+        private: no
+      - name: "install_as_service"
+        prompt: "Install API Server as service ? (yes, no)"
+        default: "no"
+        private: no
+      - name: "left_or_right"
+        prompt: "Which hand do you want to use ? (left, right)"
+        default: "right"
+        private: no
+  tasks:
+      - name: Upload API Server
+        synchronize:
+            src: ../hand_apiserver
+            dest: "{{ ansible_user_dir }}"
+            perms: yes
+
+      - name: Build
+        shell: source /etc/profile && make
+        args:
+            executable: /bin/bash
+            chdir: "{{ ansible_user_dir }}/hand_apiserver"
+            creates: "{{ ansible_user_dir }}/hand_apiserver/_output/platforms/linux/arm64/rfmocap-app"
+        when: use_go_proxy | lower != 'yes'
+
+      - name: Build with proxy
+        shell: source /etc/profile && export GOPROXY=https://goproxy.cn; make
+        args:
+            executable: /bin/bash
+            chdir: "{{ ansible_user_dir }}/hand_apiserver"
+            creates: "{{ ansible_user_dir }}/hand_apiserver/_output/platforms/linux/arm64/rfmocap-app"
+        when: use_go_proxy | lower == 'yes'
+
+      - name: Install API Server
+        become: yes
+        shell: source /etc/profile && make service.install
+        args:
+            executable: /bin/bash
+            chdir: "{{ ansible_user_dir }}/hand_apiserver"
+            creates: /etc/systemd/system/rfmocap.service
+        when: install_as_service | lower == 'yes'
+
+      - name: Use right hand
+        become: yes
+        block:
+            - name: create config directory
+              file:
+                  path: /etc/rfmocap/
+                  state: directory
+            - name: copy config file
+              copy:
+                  src: "{{ ansible_user_dir }}/hand_apiserver/manifests/config/right/config.yaml"
+                  dest: /etc/rfmocap/config.yaml
+                  remote_src: yes
+                  mode: 0755
+        when: left_or_right | lower == 'right'
+
+      - name: Use left hand
+        become: yes
+        block:
+            - name: create config directory
+              file:
+                  path: /etc/rfmocap/
+                  state: directory
+            - name: copy config file
+              copy:
+                  src: "{{ ansible_user_dir }}/hand_apiserver/manifests/config/left/config.yaml"
+                  dest: /etc/rfmocap/config.yaml
+                  remote_src: yes
+                  mode: 0755
+        when: left_or_right | lower == 'left'

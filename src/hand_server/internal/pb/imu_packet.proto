@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+option go_package = "rfmocap-ng/internal/pb";
+package protocol;
+
+message Empty {};
+
+message IMUPacketResponseRaw {
+  string id = 1;
+  float accel_x = 2;
+  float accel_y = 3;
+  float accel_z = 4;
+  float gyro_x = 5;
+  float gyro_y = 6;
+  float gyro_z = 7;
+  float mag_x = 8;
+  float mag_y = 9;
+  float mag_z = 10;
+  float quat_w = 11;
+  float quat_x = 12;
+  float quat_y = 13;
+  float quat_z = 14;
+  float roll = 15;
+  float pitch = 16;
+  float yaw = 17;
+  float pressure = 18;
+  int64 sys_ticks = 19;
+  uint32 timestamp = 20;
+  uint64 seq = 21;
+  bool valid = 22;
+};
+
+message IMUPacketResponseRepeated{
+  repeated IMUPacketResponseRaw packets = 1;
+}
+
+message IMUPacketResponseSynced {
+  map<string, IMUPacketResponseRaw> packets = 1;
+  int64 sys_ticks = 2;
+}
+
+message IMUPacketArrayResponse {
+  map<string, IMUPacketResponseRaw> packets = 1;
+  int64 sys_ticks = 2;
+  bool valid = 3;
+}
+
+message IMUPacketArrayStreamResponse {
+  repeated IMUPacketResponseSynced packets = 1;
+  bool valid = 2;
+}
+
+message IMUPacketRequest {
+  uint64 timestamp = 1;
+}
+
+message IMUSetFIFOStatusRequest {
+  bool status = 1;
+}
+
+message IMUStatusResponse {
+  bool status = 1;
+  string err = 2;
+}
+
+message IMUInfoResponse {
+  repeated string ids = 1;
+}
+
+service IMUPacketService {
+  rpc SetFIFOStatus(IMUSetFIFOStatusRequest) returns (IMUStatusResponse) {}
+  rpc GetFIFOStatus(Empty) returns (IMUStatusResponse) {}
+  rpc GetPacketArray(IMUPacketRequest) returns (IMUPacketArrayResponse) {}
+  rpc GetPacketArrayStream(IMUPacketRequest) returns (stream IMUPacketArrayStreamResponse) {}
+  rpc ListDev(Empty) returns (IMUInfoResponse) {}
+}

@@ -37,31 +37,40 @@
   - [Overview](#overview-1)
   - [Step-by-Step Setup](#step-by-step-setup)
   - [Basic Configuration](#basic-configuration)
+- [Ansible Notice](#ansible-notice)
   - [Dorsal Tracker Configuration](#dorsal-tracker-configuration)
 
 ## Introduction
+
 Accurate hand motion capture (MoCap) is critical for robotics, virtual reality, and biomechanics, yet existing systems often fail to capture high-degree-of-freedom (DoF) joint kinematics and personalized hand shapes. FSGlove addresses these limitations with an inertial-based system that tracks up to 48 DoFs and reconstructs hand shapes using DiffHCal, a novel calibration method. Equipped with IMUs on each finger joint and dorsum, FSGlove achieves high-resolution motion sensing. DiffHCal integrates with the MANO model via differentiable optimization, resolving joint kinematics, shape parameters, and sensor misalignment in a single step.
 
 > **Note:** The source code for FSGlove will be open-sourced after the reviewing process.
 
 ## Hand Assembly Guide  
-TBD. (A video instruction is being filmed.)  
 
-## Hand Server Setup  
-### Overview  
+Please refer to the [official website](https://fsglove.robotflow.ai/) for the detailed hand assembly guide.
+
+## Hand Server Setup
+
+### Overview
+
 The hand server powers the SBC on the FSGlove. It is a standard Golang project that compiles into a single binary and can run on almost any platform. We have tested it on the Raspberry Pi 2W.  
 
-### Build Instructions  
-TBD.  
+### Build Instructions
 
-## DiffHCal Setup  
-### Overview  
-DiffHCal is developed using `manotorch`, which requires a `PyTorch` environment and the presence of the MANO model. To achieve real-time processing, a capable **NVIDIA GPU** (supporting CUDA 11) is recommended.  
+Please follow the instructions in the [src/hand_apiserver/README.md](src/hand_apiserver/README.md) to build and run the hand server.
 
-Given the complex dependencies of this project, we recommend setting up a virtual environment (e.g., a Conda environment) to avoid conflicts. The project also relies on common build tools such as `Make`.  
+## DiffHCal Setup
 
-### Step-by-Step Setup  
-1. Obtain the MANO model from [here](https://mano.is.tue.mpg.de/) and extract it under `assets/mano`. The directory structure should look like this:  
+### Overview
+
+DiffHCal is developed using `manotorch`, which requires a `PyTorch` environment and the presence of the MANO model. To achieve real-time processing, a capable **NVIDIA GPU** (supporting CUDA 11) is recommended. The source code is organized as a standard Python project at [src/hand_visualiser](src/hand_visualiser), with the main entry point located in `src/hand_visualiser/main_gui_v2.py`.
+
+Given the complex dependencies of this project, we recommend setting up a virtual environment (e.g., a Conda environment) to avoid conflicts. The project also relies on common build tools such as `Make`.
+
+### Step-by-Step Setup
+
+1. Obtain the MANO model from [here](https://mano.is.tue.mpg.de/) and extract it under `assets/mano`. The directory structure should look like this:
    ```text  
    ./assets/mano  
    ├── LICENSE.txt  
@@ -70,7 +79,7 @@ Given the complex dependencies of this project, we recommend setting up a virtua
    ├── ...  
    ```  
 
-2. Create a virtual environment using `conda`. The DiffHCal project is built with `python@3.10` syntax (e.g., typing annotations) but will likely work on higher versions.  
+2. Create a virtual environment using `conda`. The DiffHCal project is built with `python@3.10` syntax (e.g., typing annotations) but will likely work on higher versions.
    ```shell  
    conda create -n rfmocap python=3.10  
    conda activate rfmocap  
@@ -85,23 +94,23 @@ Given the complex dependencies of this project, we recommend setting up a virtua
    - `numpy:1.22.4` for compatibility reasons.  
    - `manotorch` from the latest GitHub master branch.  
    - `polyscope` for visualization.  
-   - `pyrfuniverse`, a binding for [RFUniverse](https://github.com/robotflow-initiative/rfuniverse), used for simulation and tele-operation demo.  
+   - `pyrfuniverse`, a binding for [RFUniverse](https://github.com/robotflow-initiative/rfuniverse), used for simulation and tele-operation demo.
    - `grpcio-tools:1.60.0` and `grpcio==1.60.0` for gRPC communication.  
    - Other utilities.  
 
-   > On some Linux systems, you might encounter a `libdl.so` missing issue with `rfuniverse`, preventing it from loading URDF. In this case:  
+   > On some Linux systems, you might encounter a `libdl.so` missing issue with `rfuniverse`, preventing it from loading URDF. In this case:
    > 1. Install `libdl.so`:  
    >    ```shell  
    >    sudo apt-get install libc6-dev  
    >    ```  
-   > 2. Copy a working `libdl.so` to your working directory.  
+   > 2. Copy a working `libdl.so` to your working directory.
    > 3. Follow this post to create a soft-link:  
    >    ```shell  
    >    sudo ln -s /lib/x86_64-linux-gnu/libdl.so.2 /lib/x86_64-linux-gnu/libdl.so  
    >    sudo apt install minizip  
    >    ```  
 
-**Optional:** Update the gRPC client. Run the `make task.pb.python` command to update the gRPC client code in `src/api` from the latest `assets/pb/*.proto` files.  
+**Optional:** Update the gRPC client. Run the `make task.pb.python` command to update the gRPC client code in `src/api` from the latest `assets/pb/*.proto` files.
    ```shell  
    $ make task.pb.python  
    ```  
@@ -116,8 +125,24 @@ Given the complex dependencies of this project, we recommend setting up a virtua
    python -m src  
    ```  
 
-### Basic Configuration  
+### Basic Configuration
+
 The DiffHCal GUI automatically detects its default configuration at `$WORKING_DIRECTORY/config.json`. If the file is absent, it will be created and populated with default values.  
 
-### Dorsal Tracker Configuration  
+## Ansible Notice
+
+The project has a series of ansible playbooks, they require `synchronize` module, which can be installed via:
+
+```shell
+ansible-galaxy collection install ansible.posix
+```
+
+Then you can deploy these playbooks:
+
+```shell
+ansible-playbook -i inventory.ini manifests/playbook/....yml --ask-become-pass
+```
+
+### Dorsal Tracker Configuration
+
 TBD.
