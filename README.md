@@ -58,7 +58,7 @@ The hand server powers the SBC on the FSGlove. It is a standard Golang project t
 
 ### Build Instructions
 
-Please follow the instructions in the [src/hand_apiserver/README.md](src/hand_apiserver/README.md) to build and run the hand server.
+Please follow the instructions in the [src/hand_server/README.md](src/hand_server/README.md) to build and run the hand server.
 
 ## DiffHCal Setup
 
